@@ -6,6 +6,7 @@ const ctx = canvas.getContext('2d'); // 2d é o tipo de contexto para que possa 
 
 
 // PARTES DO JOGADOR:
+
 // Cria o objeto jogador
 const jogador = {
     x: 50,  // Posição horizontal inicial
@@ -15,18 +16,40 @@ const jogador = {
     largura: 40,
     altura: 40,
 
-    cor: 'red'// Cor dele
+    cor: 'red',// Cor dele
+    vida: 3, // Vida do jogador
+    estaPiscando: false,
+    temEspada: false,
 };
 
 // Desenha o jogador
 function desenharJogador() {
-    // Função de desenhar o jogador
-    ctx.fillStyle = jogador.cor;
+    // Vida do Jogador
+    if (jogador.vida <= 0) return;
+
+    // Se estiver piscando (levou dano), desenha branco.
+    // Senão, desenha com a cor original.
+    ctx.fillStyle = jogador.estaPiscando ? 'white' : jogador.cor;
     ctx.fillRect(jogador.x, jogador.y, jogador.largura, jogador.altura);
+   
+
+    // Desenha a espada se tiver coletada
+    if (jogador.temEspada) {
+        ctx.fillStyle = '#C0C0C0'; // Cor prata/cinza
+        // Desenha a espada saindo da direita do jogador
+        ctx.fillRect(jogador.x + jogador.largura, jogador.y + 10, 10, 25);
+        // Um pequeno detalhe para o cabo da espada
+        ctx.fillStyle = 'brown';
+        ctx.fillRect(jogador.x + jogador.largura, jogador.y + 25, 10, 5);
+    }
+
+    // Exibir vidas na tela
+    ctx.fillStyle = 'black';
+    ctx.font = '20px Arial';
+    ctx.fillText("Vidas: " + jogador.vida, 10, 30);
+
 }
 
-// Chama essa função para ele aparacer na tela.
-desenharJogador();
 
 // Const para o navegador saber que as teclas estão sendo pressionados
 const teclasPressionadas = {}
@@ -34,6 +57,7 @@ const teclasPressionadas = {}
 window.addEventListener('keydown', (e) => {
     teclasPressionadas[e.key] = true;
 });
+
 
 // Quando soltar a tecla
 window.addEventListener('keyup', (e) => {
@@ -58,8 +82,10 @@ function moverJogador() {
     }
 }
 
+/* ------------------------------------------------ */
 
 // PARTES DO INIMIGO:
+
 // Criar objeto inimigo
 const inimigo = {
     x: 200,
@@ -67,6 +93,10 @@ const inimigo = {
     largura: 40,
     altura: 40,
     cor: 'blue',
+    velocidade: 1.5,
+    vivo: true,
+    vida: 3,
+    estaPiscando: false,
 }
 
 // Desenhar o inimigo
@@ -75,11 +105,88 @@ function desenharInimigo() {
     ctx.fillRect(inimigo.x, inimigo.y, inimigo.largura, inimigo.altura);
 }
 
-desenharInimigo();
+// Movimentação do inimigo
+function moverInimigo() {
+    if (!inimigo.vivo || jogador.vida <= 0) return; // Se estiver morto, não se move
+
+    // Movimentação: inimigo segue jogador
+    // Logica do eixo X (Esquerda/Direita)
+    if (inimigo.x < jogador.x) inimigo.x += inimigo.velocidade;
+    else if (inimigo.x > jogador.x) inimigo.x -= inimigo.velocidade;
+
+    // Logica do eixo Y (Cima/Baixo)
+    if (inimigo.y < jogador.y) inimigo.y += inimigo.velocidade;
+    else if (inimigo.y > jogador.y) inimigo.y -= inimigo.velocidade;
+}
+
+/* ------------------------------------------------ */
+
+// PARTE DA COLSÃO:
+
+// Colisão entre jogador e inimigo
+jogador.temEspada = false;
+
+function checarColisao() {
+    if (!inimigo.vivo || jogador.vida <= 0) return;
+
+    // Verifica se os dois quadrados estão se sobrepondo (AABB)
+    const houveContato =
+        jogador.x < inimigo.x + inimigo.largura &&
+        jogador.x + jogador.largura > inimigo.x &&
+        jogador.y < inimigo.y + inimigo.altura &&
+        jogador.y + jogador.altura > inimigo.y;
 
 
+    // Só mata o inimigo se houver contato E a tecla Espaço (' ') estiver pressionada
+    if (houveContato) {
 
+        // CASO 1: Jogador ataca o inimigo
+        if (teclasPressionadas[' '] && !inimigo.estaPiscando) {
+            inimigo.vida -= 1; // Dminui a vida do inimigo
+            inimigo.estaPiscando = true; // Ativa o efeito de piscar
 
+            // Time para parar de piscar após 100ms
+            setTimeout(() => {
+                inimigo.estaPiscando = false;
+            }, 100);
+
+            // Se avida zerar, ele morre e dá a espada
+            if (inimigo.vida <= 0) {
+                inimigo.vivo = false;
+                jogador.temEspada = true;
+                jogador.cor = 'gold'; // Indica que o jogador agora tem a espada
+                console.log("K.O.! Você abateu o inimigo e coletou a espada!");
+            }
+        }
+
+        // CASO 2: Inimigo toca no jogador(Dano no jogador)
+        // Só toma dano se não estiver atacando e não estiver piscando (invencível)
+        else if (!teclasPressionadas[' '] && !jogador.estaPiscando) {
+            jogador.vida -= 1;
+            jogador.estaPiscando = true;
+            console.log("Você perdeu uma vida! Vidas restantes: " + jogador.vida);
+
+            // Jogador fica branco/invencível por 1 segundo
+            setTimeout(() => {
+                jogador.estaPiscando = false;
+            }, 1000);
+
+            if (jogador.vida <= 0) {
+                console.log("GAME OVER!");
+                // Opcional: resetar a posição ou a vida para testar
+            }
+        }
+    }
+}
+
+function desenharInimigo() {
+    if (!inimigo.vivo) return;
+
+    // Se estiver piscando, a tinta é branca. Senão, é a cor original.
+    ctx.fillStyle = inimigo.estaPiscando ? 'white' : inimigo.cor;
+
+    ctx.fillRect(inimigo.x, inimigo.y, inimigo.largura, inimigo.altura);
+}
 
 
 /** 
@@ -96,11 +203,15 @@ function atualizar() {
 
     // 2. Atualiza a logica de cada objeto
     moverJogador();
+    moverInimigo();
+    checarColisao();
 
 
     // 3. Redesenha tudo na tela
     desenharJogador();
-    desenharInimigo();
+    if (inimigo.vivo) {
+        desenharInimigo();
+    }
 
     // 4. Repete
     requestAnimationFrame(atualizar);
