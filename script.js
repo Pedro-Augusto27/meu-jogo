@@ -41,7 +41,7 @@ window.addEventListener('keyup', (e) => {
 });
 
 // Movimetação do jogador
-const velocidade = 5; // Quantas pixels o jogador anda por frame
+const velocidade = 5; // Quantos pixels o jogador anda por frame
 
 function moverJogador() {
     if (teclasPressionadas['ArrowUp'] && jogador.y > 0) {
@@ -49,7 +49,7 @@ function moverJogador() {
     }
     if (teclasPressionadas['ArrowDown'] && jogador.y < canvas.height - jogador.altura) {
         jogador.y += velocidade; // Move para baixo
-    } 
+    }
     if (teclasPressionadas['ArrowLeft'] && jogador.x > 0) {
         jogador.x -= velocidade; // Move para esquerda
     }
@@ -61,8 +61,21 @@ function moverJogador() {
 
 // PARTES DO INIMIGO:
 // Criar objeto inimigo
+const inimigo = {
+    x: 200,
+    y: 200,
+    largura: 40,
+    altura: 40,
+    cor: 'blue',
+}
 
+// Desenhar o inimigo
+function desenharInimigo() {
+    ctx.fillStyle = inimigo.cor;
+    ctx.fillRect(inimigo.x, inimigo.y, inimigo.largura, inimigo.altura);
+}
 
+desenharInimigo();
 
 
 
@@ -87,6 +100,7 @@ function atualizar() {
 
     // 3. Redesenha tudo na tela
     desenharJogador();
+    desenharInimigo();
 
     // 4. Repete
     requestAnimationFrame(atualizar);
