@@ -155,7 +155,6 @@ function checarColisao() {
                 inimigo.vivo = false;
                 jogador.temEspada = true;
                 jogador.cor = 'gold'; // Indica que o jogador agora tem a espada
-                console.log("K.O.! Você abateu o inimigo e coletou a espada!");
             }
         }
 
@@ -164,7 +163,6 @@ function checarColisao() {
         else if (!teclasPressionadas[' '] && !jogador.estaPiscando) {
             jogador.vida -= 1;
             jogador.estaPiscando = true;
-            console.log("Você perdeu uma vida! Vidas restantes: " + jogador.vida);
 
             // Jogador fica branco/invencível por 1 segundo
             setTimeout(() => {
@@ -172,8 +170,10 @@ function checarColisao() {
             }, 1000);
 
             if (jogador.vida <= 0) {
-                console.log("GAME OVER!");
-                // Opcional: resetar a posição ou a vida para testar
+                // Alerta pausa o jogo. Quando você clica em OK, o código continua.
+                alert("GAME OVER! Você foi derrotado.")
+
+                resetarJogo(); // Limpa tudo para começar de novo
             }
         }
     }
@@ -188,6 +188,28 @@ function desenharInimigo() {
     ctx.fillRect(inimigo.x, inimigo.y, inimigo.largura, inimigo.altura);
 }
 
+/* ------------------------------------------------ */
+
+// PARTE DE RESETAR O JOGO:
+// Acontece quando o jogador perde todas as vidas.
+function resetarJogo() {
+    // Reseta o Jogador
+    jogador.x = 50;
+    jogador.y = 50;
+    jogador.vida = 3;
+    jogador.temEspada = false;
+    jogador.cor = 'red';
+    jogador.estaPiscando = false;
+
+    // Reseta o Inimigo
+    inimigo.x = 200;
+    inimigo.y = 200;
+    inimigo.vida = 3;
+    inimigo.vivo = true;
+    inimigo.estaPiscando = false;
+
+    console.log("Jogo Resetado!");
+}
 
 /** 
  * Função para atualizar o jogo, onde faz com o navegador redesenhe a tela
