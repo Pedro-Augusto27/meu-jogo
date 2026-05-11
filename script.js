@@ -1,3 +1,8 @@
+// Novas variáveis
+let cenarioAtual = 1; // Variavel que indica o cenario atual do jogo.
+const bolasDeFogo = []; // Array para guardar os tiros
+jogador.temPoderFogo = false;
+
 // Pega o elemento canva do HTML com id "meuJogo".
 const canvas = document.getElementById('meuJogo');
 
@@ -69,21 +74,28 @@ const velocidade = 5; // Quantos pixels o jogador anda por frame
 
 function moverJogador() {
     if (teclasPressionadas['ArrowUp'] && jogador.y > 0) {
-        jogador.y -= velocidade; // Move para cima 
+        if (jogador.y > 0) { 
+            jogador.y -= velocidade; // Move para cima
+        } else if (!inimigo.vivo) {
+            // Se ele chegou no topo (y <= 0) e o inimigo morreu...
+            mudarCenario();
+        } 
     }
+
     if (teclasPressionadas['ArrowDown'] && jogador.y < canvas.height - jogador.altura) {
         jogador.y += velocidade; // Move para baixo
     }
+
     if (teclasPressionadas['ArrowLeft'] && jogador.x > 0) {
         jogador.x -= velocidade; // Move para esquerda
     }
+
     if (teclasPressionadas['ArrowRight'] && jogador.x < canvas.width - jogador.largura) {
         jogador.x += velocidade; // Move para direita
     }
 }
 
 /* ------------------------------------------------ */
-
 // PARTES DO INIMIGO:
 
 // Criar objeto inimigo
@@ -120,7 +132,6 @@ function moverInimigo() {
 }
 
 /* ------------------------------------------------ */
-
 // PARTE DA COLSÃO:
 
 // Colisão entre jogador e inimigo
@@ -189,8 +200,8 @@ function desenharInimigo() {
 }
 
 /* ------------------------------------------------ */
-
 // PARTE DE RESETAR O JOGO:
+
 // Acontece quando o jogador perde todas as vidas.
 function resetarJogo() {
     // Reseta o Jogador
@@ -211,6 +222,24 @@ function resetarJogo() {
     console.log("Jogo Resetado!");
 }
 
+/* ------------------------------------------------ */
+// PARTE DE MUDAR CENÁRIO:
+
+function mudarCenario() {
+    cenarioAtual ++;
+    console.log("Bem-Vindo ao cenário" + cenarioAtual);
+
+    // 1. Reposiciona o jogador no na parte inferior da tela
+    jogador.y = canvas.height - jogador.altura - 10;
+
+    // 2. Cria um novo inimigo ou reseta o atual
+    inimigo.vivo = true;
+    inimigo.vida = 3 + cenariosAtual; // Fica mais dificil s cada fase
+    inimigo.x = Math.random() * (canvas.width - inimigo.largura);
+    inimigo.y = 100; // Inimigo aparece no topo no novo mapa
+
+}
+
 /** 
  * Função para atualizar o jogo, onde faz com o navegador redesenhe a tela
  * muitas vezes por segundo. 
@@ -221,8 +250,15 @@ function resetarJogo() {
 */
 function atualizar() {
     // 1. Limpa o canvas inteiro (da posição 0, 0 até o fim)
+    // Muda a cor de fundo conforme o cenário
+    if (cenarioAtual === 1) {
+        ctx.fillStyle = "rgb(92, 97, 107)"; // Cinza original
+    } else if (cenarioAtual === 2) {
+        ctx.fillStyle = "#2d5a27"; // Um verde floresta
+    } else {
+        ctx.fillStyle = "#5a2d27"; // Um tom de caverna
+    }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     // 2. Atualiza a logica de cada objeto
     moverJogador();
     moverInimigo();
@@ -238,5 +274,4 @@ function atualizar() {
     // 4. Repete
     requestAnimationFrame(atualizar);
 }
-
 atualizar();
