@@ -1,141 +1,9 @@
-// Novas variáveis
-let cenarioAtual = 1; // Variavel que indica o cenario atual do jogo.
-const bolasDeFogo = []; // Array para guardar os tiros
-jogador.temPoderFogo = false;
-
-// Pega o elemento canva do HTML com id "meuJogo".
-const canvas = document.getElementById('meuJogo');
-
-// ctx = Contexto, é o que usamos para desenhar no canvas e o tipo de contexto.
-const ctx = canvas.getContext('2d'); // 2d é o tipo de contexto para que possa desenhar.
+// Arquivo 'logicaJogo.js' é responsavel por toda a logica do
+// jogo, como movimentação, colisão, mudança de cenário, etc.
 
 
-// PARTES DO JOGADOR:
-
-// Cria o objeto jogador
-const jogador = {
-    x: 50,  // Posição horizontal inicial
-    y: 50,  // Posição vertical inicial
-
-    // Tamanho do jogador
-    largura: 40,
-    altura: 40,
-
-    cor: 'red',// Cor dele
-    vida: 3, // Vida do jogador
-    estaPiscando: false,
-    temEspada: false,
-};
-
-// Desenha o jogador
-function desenharJogador() {
-    // Vida do Jogador
-    if (jogador.vida <= 0) return;
-
-    // Se estiver piscando (levou dano), desenha branco.
-    // Senão, desenha com a cor original.
-    ctx.fillStyle = jogador.estaPiscando ? 'white' : jogador.cor;
-    ctx.fillRect(jogador.x, jogador.y, jogador.largura, jogador.altura);
-   
-
-    // Desenha a espada se tiver coletada
-    if (jogador.temEspada) {
-        ctx.fillStyle = '#C0C0C0'; // Cor prata/cinza
-        // Desenha a espada saindo da direita do jogador
-        ctx.fillRect(jogador.x + jogador.largura, jogador.y + 10, 10, 25);
-        // Um pequeno detalhe para o cabo da espada
-        ctx.fillStyle = 'brown';
-        ctx.fillRect(jogador.x + jogador.largura, jogador.y + 25, 10, 5);
-    }
-
-    // Exibir vidas na tela
-    ctx.fillStyle = 'black';
-    ctx.font = '20px Arial';
-    ctx.fillText("Vidas: " + jogador.vida, 10, 30);
-
-}
-
-
-// Const para o navegador saber que as teclas estão sendo pressionados
-const teclasPressionadas = {}
-// Quando apertar a tecla
-window.addEventListener('keydown', (e) => {
-    teclasPressionadas[e.key] = true;
-});
-
-
-// Quando soltar a tecla
-window.addEventListener('keyup', (e) => {
-    teclasPressionadas[e.key] = false;
-});
-
-// Movimetação do jogador
-const velocidade = 5; // Quantos pixels o jogador anda por frame
-
-function moverJogador() {
-    if (teclasPressionadas['ArrowUp'] && jogador.y > 0) {
-        if (jogador.y > 0) { 
-            jogador.y -= velocidade; // Move para cima
-        } else if (!inimigo.vivo) {
-            // Se ele chegou no topo (y <= 0) e o inimigo morreu...
-            mudarCenario();
-        } 
-    }
-
-    if (teclasPressionadas['ArrowDown'] && jogador.y < canvas.height - jogador.altura) {
-        jogador.y += velocidade; // Move para baixo
-    }
-
-    if (teclasPressionadas['ArrowLeft'] && jogador.x > 0) {
-        jogador.x -= velocidade; // Move para esquerda
-    }
-
-    if (teclasPressionadas['ArrowRight'] && jogador.x < canvas.width - jogador.largura) {
-        jogador.x += velocidade; // Move para direita
-    }
-}
-
-/* ------------------------------------------------ */
-// PARTES DO INIMIGO:
-
-// Criar objeto inimigo
-const inimigo = {
-    x: 200,
-    y: 200,
-    largura: 40,
-    altura: 40,
-    cor: 'blue',
-    velocidade: 1.5,
-    vivo: true,
-    vida: 3,
-    estaPiscando: false,
-}
-
-// Desenhar o inimigo
-function desenharInimigo() {
-    ctx.fillStyle = inimigo.cor;
-    ctx.fillRect(inimigo.x, inimigo.y, inimigo.largura, inimigo.altura);
-}
-
-// Movimentação do inimigo
-function moverInimigo() {
-    if (!inimigo.vivo || jogador.vida <= 0) return; // Se estiver morto, não se move
-
-    // Movimentação: inimigo segue jogador
-    // Logica do eixo X (Esquerda/Direita)
-    if (inimigo.x < jogador.x) inimigo.x += inimigo.velocidade;
-    else if (inimigo.x > jogador.x) inimigo.x -= inimigo.velocidade;
-
-    // Logica do eixo Y (Cima/Baixo)
-    if (inimigo.y < jogador.y) inimigo.y += inimigo.velocidade;
-    else if (inimigo.y > jogador.y) inimigo.y -= inimigo.velocidade;
-}
-
-/* ------------------------------------------------ */
 // PARTE DA COLSÃO:
-
-// Colisão entre jogador e inimigo
-jogador.temEspada = false;
+jogador.temEspada = false; // Colisão entre jogador e inimigo
 
 function checarColisao() {
     if (!inimigo.vivo || jogador.vida <= 0) return;
@@ -199,9 +67,9 @@ function desenharInimigo() {
     ctx.fillRect(inimigo.x, inimigo.y, inimigo.largura, inimigo.altura);
 }
 
+
 /* ------------------------------------------------ */
 // PARTE DE RESETAR O JOGO:
-
 // Acontece quando o jogador perde todas as vidas.
 function resetarJogo() {
     // Reseta o Jogador
@@ -222,9 +90,9 @@ function resetarJogo() {
     console.log("Jogo Resetado!");
 }
 
+
 /* ------------------------------------------------ */
 // PARTE DE MUDAR CENÁRIO:
-
 function mudarCenario() {
     cenarioAtual ++;
     console.log("Bem-Vindo ao cenário" + cenarioAtual);
@@ -240,7 +108,12 @@ function mudarCenario() {
 
 }
 
+
+/* ------------------------------------------------ */
+// PARTE DE ATUALIZAR:
+
 /** 
+ * NOTA:
  * Função para atualizar o jogo, onde faz com o navegador redesenhe a tela
  * muitas vezes por segundo. 
  * 
@@ -259,11 +132,11 @@ function atualizar() {
         ctx.fillStyle = "#5a2d27"; // Um tom de caverna
     }
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
     // 2. Atualiza a logica de cada objeto
     moverJogador();
     moverInimigo();
     checarColisao();
-
 
     // 3. Redesenha tudo na tela
     desenharJogador();
