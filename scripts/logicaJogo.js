@@ -102,7 +102,7 @@ function mudarCenario() {
 
     // 2. Cria um novo inimigo ou reseta o atual
     inimigo.vivo = true;
-    inimigo.vida = 3 + cenariosAtual; // Fica mais dificil s cada fase
+    inimigo.vida = 3 + cenarioAtual; // Fica mais dificil s cada fase
     inimigo.x = Math.random() * (canvas.width - inimigo.largura);
     inimigo.y = 100; // Inimigo aparece no topo no novo mapa
 
@@ -131,7 +131,7 @@ function atualizar() {
     } else {
         ctx.fillStyle = "#5a2d27"; // Um tom de caverna
     }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // 2. Atualiza a logica de cada objeto
     moverJogador();
